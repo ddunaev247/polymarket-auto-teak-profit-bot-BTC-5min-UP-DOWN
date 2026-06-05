@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>iPhone Calculator</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="calculator">
+        <div class="display" id="display">0</div>
+        <div class="buttons">
+            <!-- Верхний ряд -->
+            <button class="btn btn-light" onclick="clearDisplay()">AC</button>
+            <button class="btn btn-light" onclick="toggleSign()">+/-</button>
+            <button class="btn btn-light" onclick="inputPercent()">%</button>
+            <button class="btn btn-orange" onclick="setOperator('/')">÷</button>
+
+            <!-- Цифры 7-9 и Умножение -->
+            <button class="btn btn-dark" onclick="inputDigit(7)">7</button>
+            <button class="btn btn-dark" onclick="inputDigit(8)">8</button>
+            <button class="btn btn-dark" onclick="inputDigit(9)">9</button>
+            <button class="btn btn-orange" onclick="setOperator('*')">×</button>
+
+            <!-- Цифры 4-6 и Вычитание -->
+            <button class="btn btn-dark" onclick="inputDigit(4)">4</button>
+            <button class="btn btn-dark" onclick="inputDigit(5)">5</button>
+            <button class="btn btn-dark" onclick="inputDigit(6)">6</button>
+            <button class="btn btn-orange" onclick="setOperator('-')">−</button>
+
+            <!-- Цифры 1-3 и Сложение -->
+            <button class="btn btn-dark" onclick="inputDigit(1)">1</button>
+            <button class="btn btn-dark" onclick="inputDigit(2)">2</button>
+            <button class="btn btn-dark" onclick="inputDigit(3)">3</button>
+            <button class="btn btn-orange" onclick="setOperator('+')">+</button>
+
+            <!-- Ноль, точка и Равно -->
+            <button class="btn btn-dark zero" onclick="inputDigit(0)">0</button>
+            <button class="btn btn-dark" onclick="inputDecimal()">.</button>
+            <button class="btn btn-orange" onclick="calculate()">=</button>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>

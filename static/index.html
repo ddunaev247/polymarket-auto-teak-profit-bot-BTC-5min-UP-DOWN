@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Polymarket BTC Up/Down 5-Minute Trading Bot — Web Interface">
+    <title>Polymarket BTC Trader</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📊</text></svg>">
+</head>
+<body>
+    <div class="app-container">
+
+        <!-- HEADER -->
+        <header class="header" id="header">
+            <div class="header-left">
+                <div class="header-logo">₿</div>
+                <div>
+                    <div class="header-title">Polymarket BTC Trader</div>
+                    <div class="header-subtitle">BTC Up/Down 5-Minute</div>
+                </div>
+            </div>
+            <div class="header-right">
+                <nav class="header-nav" aria-label="Разделы">
+                    <button type="button" class="nav-tab active" id="nav-trade" data-view="trade">Trade</button>
+                    
+                </nav>
+                <div class="status-badge disconnected" id="status-badge">
+                    <span class="status-dot"></span>
+                    <span id="status-text">Подключение...</span>
+                </div>
+            </div>
+        </header>
+
+        <div id="view-trade" class="app-view">
+
+        <!-- EVENT INFO -->
+        <section class="event-panel" id="event-panel">
+            <div class="event-info">
+                <span class="event-label">Активное событие</span>
+                <span class="event-name" id="event-name">Загрузка...</span>
+            </div>
+            <div class="event-timer">
+                <span class="timer-label">До закрытия</span>
+                <span class="timer-value" id="event-timer">--:--</span>
+            </div>
+        </section>
+
+        <!-- AI EXTRAPOLATION RECOMMENDATION -->
+        <section id="ai-recommender" class="ai-panel" style="display:none; padding:10px; margin-bottom:10px; border-radius:8px; text-align:center; font-weight:bold;">
+            <span id="ai-recommender-text"></span>
+        </section>
+
+        <!-- BALANCE & ORDER SIZE -->
+        <section class="balance-panel" id="balance-panel">
+            <div class="balance-info">
+                <span class="balance-label">Баланс USDC</span>
+                <span class="balance-value" id="balance-value">$--.--</span>
+                <span class="balance-pnl neutral" id="balance-pnl-day">PnL за сутки: --</span>
+            </div>
+            <div class="order-size-control">
+                <label class="size-label" for="order-size-input">Размер позиции ($)</label>
+                <div class="size-input-wrap">
+                    <button class="size-btn" id="size-minus" onclick="adjustSize(-1)">−</button>
+                    <input type="number" class="size-input" id="order-size-input" value="10" min="1" max="10000" step="1">
+                    <button class="size-btn" id="size-plus" onclick="adjustSize(1)">+</button>
+                    <button class="size-btn size-max" id="size-max" onclick="setMaxSize()" title="Max">MAX</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- TRADE OFFSETS: buy below market, profit on sell -->
+        <section class="offset-panel" id="offset-panel">
+            <div class="offset-field">
+                <label class="offset-label" for="buy-offset-input">Отступ покупки от рынка ($)</label>
+                <input type="number" class="offset-input" id="buy-offset-input" value="0.04" min="0" max="0.50" step="0.01" title="На сколько ниже midpoint ставить лимитку на покупку">
+            </div>
+            <div class="offset-field">
+                <label class="offset-label" for="sell-offset-input">Профит / наценка продажи ($)</label>
+                <input type="number" class="offset-input" id="sell-offset-input" value="0.10" min="0.01" max="0.50" step="0.01" title="На сколько выше цены покупки ставить лимитку на продажу">
+            </div>
+        </section>
+
+        <section class="grafic-panel" id="grafic-panel">
+                <div class="panel-header">
+                    <span class="panel-title"><span class="icon">📉</span> Grafic</span>
+                </div>
+                <p class="grafic-disclaimer">
+                    В реальном времени: <strong>P(UP)</strong> с CLOB (левая ось, %), <strong>BTC spot</strong> и
+                    <strong>таргет</strong> — открытие 5m-свечи Binance для текущего окна (правая ось, USDT). Таргет — ориентир для графика, не обязательно совпадает с on-chain oracle Polymarket.
+                </p>
+                <div class="grafic-legend" id="grafic-legend"></div>
+                <div class="grafic-chart-wrap">
+                    <canvas id="grafic-chart" aria-label="График вероятности и цены BTC"></canvas>
+                </div>
+            </section>
+
+        <!-- TRADING BUTTONS -->
+        <section class="trading-panel" id="trading-panel">
+            <button class="trade-btn up" id="btn-up" disabled onclick="placeTrade('UP')">
+                <span class="btn-icon">🟢</span>
+                <span class="btn-direction">UP</span>
+                <span class="btn-price" id="price-up">--¢</span>
+                <span class="btn-sublabel">Нажми для покупки</span>
+            </button>
+            <button class="trade-btn down" id="btn-down" disabled onclick="placeTrade('DOWN')">
+                <span class="btn-icon">🔴</span>
+                <span class="btn-direction">DOWN</span>
+                <span class="btn-price" id="price-down">--¢</span>
+                <span class="btn-sublabel">Нажми для покупки</span>
+            </button>
+        </section>
+
+        <!-- ACTIVE ORDERS -->
+        <section class="orders-panel" id="orders-panel">
+            <div class="panel-header">
+                <span class="panel-title"><span class="icon">📋</span> Активные ордера</span>
+                <span class="orders-count" id="orders-count">0</span>
+            </div>
+            <div id="orders-body">
+                <div class="orders-empty" id="orders-empty">Нет активных ордеров</div>
+            </div>
+        </section>
+
+        <!-- LOG PANEL -->
+        <section class="log-panel" id="log-panel">
+            <div class="panel-header">
+                <span class="panel-title"><span class="icon">📝</span> Логи</span>
+                <button class="log-clear-btn" id="log-clear-btn" onclick="clearLogs()">Очистить</button>
+            </div>
+            <div class="log-content" id="log-content">
+                <!-- Log entries appear here -->
+            </div>
+        </section>
+
+        <!-- CONFIG BAR -->
+        <footer class="config-bar" id="config-bar">
+            <div class="config-item">
+                <span class="config-label">Дефолт отступа (сервер):</span>
+                <span class="config-value" id="cfg-buy-offset">--¢</span>
+            </div>
+            <div class="config-item">
+                <span class="config-label">Дефолт профита (сервер):</span>
+                <span class="config-value" id="cfg-sell-offset">--¢</span>
+            </div>
+            <div class="config-item">
+                <span class="config-label">Мониторинг:</span>
+                <span class="config-value">1 сек</span>
+            </div>
+        </footer>
+
+        </div><!-- /view-trade -->
+
+        
+
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3.0.0/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
+    <!-- Socket.IO client -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.4/socket.io.min.js"></script>
+    <script src="/static/app.js"></script>
+</body>
+</html>

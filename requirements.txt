@@ -1,0 +1,7 @@
+py-clob-client
+python-dotenv
+flask
+flask-socketio
+eventlet
+requests
+matplotlib
